@@ -128,7 +128,11 @@ target_compile_definitions(aria2_core PRIVATE
   BOOST_ASIO_HEADER_ONLY
   BOOST_ERROR_CODE_HEADER_ONLY)
 target_link_libraries(aria2_core PRIVATE spdlog::spdlog_header_only)
-target_link_libraries(aria2_core PUBLIC CURL::libcurl_static)
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  target_link_libraries(aria2_core PUBLIC CURL::libcurl)
+else()
+  target_link_libraries(aria2_core PUBLIC CURL::libcurl_static)
+endif()
 if(ENABLE_WEBSOCKET)
   target_link_libraries(aria2_core PUBLIC wslay)
 endif()

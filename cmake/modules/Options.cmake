@@ -19,6 +19,12 @@ set(ARIA2_BASH_COMPLETION_DIR "" CACHE PATH "Bash completion installation direct
 set(ARIA2_DEPENDENCY_ROOT "" CACHE PATH "Vendored dependency installation")
 set(ARIA2_BOOST_ROOT "" CACHE PATH "Vendored Boost source root")
 
+if((ARIA2_DEPENDENCY_ROOT AND NOT ARIA2_BOOST_ROOT) OR
+    (ARIA2_BOOST_ROOT AND NOT ARIA2_DEPENDENCY_ROOT))
+  message(FATAL_ERROR
+    "ARIA2_DEPENDENCY_ROOT and ARIA2_BOOST_ROOT must be provided together")
+endif()
+
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/packaging/dependencies.env"
   ARIA2_WSLAY_VERSION_LINE REGEX "^WSLAY_VERSION=[0-9]+\\.[0-9]+\\.[0-9]+$")
 string(REGEX REPLACE "^WSLAY_VERSION=" ""
@@ -27,10 +33,10 @@ if(NOT ARIA2_WSLAY_VERSION)
   message(FATAL_ERROR "WSLAY_VERSION is missing from packaging/dependencies.env")
 endif()
 
-if(NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
+if(ARIA2_DEPENDENCY_ROOT AND NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
   message(FATAL_ERROR "ARIA2_DEPENDENCY_ROOT must reference the vendored dependency installation")
 endif()
-if(NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
+if(ARIA2_BOOST_ROOT AND NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
   message(FATAL_ERROR "ARIA2_BOOST_ROOT must reference the vendored Boost source root")
 endif()
 

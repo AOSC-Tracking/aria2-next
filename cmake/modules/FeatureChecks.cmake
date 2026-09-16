@@ -167,7 +167,20 @@ set(HAVE_OPENSSL_CRYPTO 1)
 
 if(ARIA2_ENABLE_BITTORRENT)
   cmake_push_check_state(RESET)
-  set(CMAKE_REQUIRED_LIBRARIES LibtorrentRasterbar::torrent-rasterbar)
+  if(ARIA2_DEPENDENCY_LINKAGE STREQUAL "SHARED")
+    # Targets created by add_subdirectory() are not visible to try_compile().
+    set(CMAKE_REQUIRED_INCLUDES
+      "${CMAKE_SOURCE_DIR}/third_party/libtorrent/include"
+      ${Boost_INCLUDE_DIRS})
+    set(CMAKE_REQUIRED_DEFINITIONS
+      -DTORRENT_USE_RTC=0
+      -DTORRENT_USE_OPENSSL
+      -DTORRENT_USE_LIBCRYPTO
+      -DTORRENT_SSL_PEERS)
+  else()
+    set(CMAKE_REQUIRED_LIBRARIES
+      LibtorrentRasterbar::torrent-rasterbar)
+  endif()
   check_cxx_source_compiles("
 #include <libtorrent/config.hpp>
 #ifdef TORRENT_DISABLE_DHT
