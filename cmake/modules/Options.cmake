@@ -21,9 +21,14 @@ set(ARIA2_BASH_COMPLETION_DIR "" CACHE PATH "Bash completion installation direct
 set(ARIA2_DEPENDENCY_ROOT "" CACHE PATH "Vendored dependency installation")
 set(ARIA2_BOOST_ROOT "" CACHE PATH "Vendored Boost source root")
 
-if(NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
+if((ARIA2_DEPENDENCY_ROOT AND NOT ARIA2_BOOST_ROOT) OR
+    (ARIA2_BOOST_ROOT AND NOT ARIA2_DEPENDENCY_ROOT))
+  message(FATAL_ERROR
+    "ARIA2_DEPENDENCY_ROOT and ARIA2_BOOST_ROOT must be provided together")
+endif()
+if(ARIA2_DEPENDENCY_ROOT AND NOT IS_DIRECTORY "${ARIA2_DEPENDENCY_ROOT}")
   message(FATAL_ERROR "ARIA2_DEPENDENCY_ROOT must reference the vendored dependency installation")
 endif()
-if(NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
+if(ARIA2_BOOST_ROOT AND NOT IS_DIRECTORY "${ARIA2_BOOST_ROOT}/boost/asio")
   message(FATAL_ERROR "ARIA2_BOOST_ROOT must reference the vendored Boost source root")
 endif()

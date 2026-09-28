@@ -4,6 +4,9 @@ file(GLOB_RECURSE ARIA2_SOURCES CONFIGURE_DEPENDS
 list(REMOVE_ITEM ARIA2_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/Main.cc")
 
 add_library(aria2_core STATIC ${ARIA2_SOURCES})
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  add_dependencies(aria2_core ffmpeg_project gpac_project)
+endif()
 target_include_directories(aria2_core PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
   "${ARIA2_BOOST_ROOT}")
@@ -13,17 +16,32 @@ target_compile_definitions(aria2_core PUBLIC
   BOOST_ERROR_CODE_HEADER_ONLY
   BOOST_JSON_NO_LIB
   XML_STATIC)
-target_link_libraries(aria2_core PUBLIC
-  spdlog::spdlog_header_only
-  CURL::libcurl_static
-  aria2::sqlite
-  OpenSSL::SSL
-  OpenSSL::Crypto
-  aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
-  aria2::expat
-  aria2::zlib
-  LibtorrentRasterbar::torrent-rasterbar
-  Threads::Threads)
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  target_link_libraries(aria2_core PUBLIC
+    spdlog::spdlog_header_only
+    CURL::libcurl
+    aria2::sqlite
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
+    aria2::expat
+    aria2::zlib
+    LibtorrentRasterbar::torrent-rasterbar
+    Threads::Threads)
+else()
+  target_link_libraries(aria2_core PUBLIC
+    spdlog::spdlog_header_only
+    CURL::libcurl_static
+    aria2::sqlite
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    aria2::gpac aria2::avformat aria2::avcodec aria2::swresample aria2::avutil
+    aria2::expat
+    aria2::zlib
+    LibtorrentRasterbar::torrent-rasterbar
+    Threads::Threads)
+endif()
+
 if(WIN32)
   # Asio lock layouts must agree across the core, dependencies and consumers.
   target_compile_definitions(aria2_core PUBLIC

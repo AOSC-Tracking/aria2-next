@@ -1,3 +1,5 @@
+if(ARIA2_DEPENDENCY_ROOT)
+
 function(aria2_import_dependency target header)
   set(options)
   set(one_value_args)
@@ -57,6 +59,7 @@ find_package(OpenSSL ${ARIA2_MIN_OPENSSL_VERSION} CONFIG REQUIRED
   NO_DEFAULT_PATH
   NO_CMAKE_FIND_ROOT_PATH)
 
+
 unset(LibtorrentRasterbar_DIR CACHE)
 unset(Boost_DIR CACHE)
 unset(Boost_INCLUDE_DIR CACHE)
@@ -69,6 +72,9 @@ find_package(LibtorrentRasterbar ${ARIA2_MIN_LIBTORRENT_VERSION}
   PATHS "${ARIA2_DEPENDENCY_ROOT}/lib/cmake/LibtorrentRasterbar"
   NO_DEFAULT_PATH
   NO_CMAKE_FIND_ROOT_PATH)
+  set(ARIA2_LIBTORRENT_INCLUDE_DIR "${ARIA2_DEPENDENCY_ROOT}/include")
+
+
 
 unset(CURL_DIR CACHE)
 set(CURL_DIR "${ARIA2_DEPENDENCY_ROOT}/lib/cmake/CURL")
@@ -107,4 +113,8 @@ if(WIN32)
   target_compile_definitions(aria2_spdlog INTERFACE
     SPDLOG_UTF8_TO_WCHAR_CONSOLE
     SPDLOG_WCHAR_FILENAMES)
+endif()
+
+else()
+  include(${CMAKE_CURRENT_LIST_DIR}/SystemDependencies.cmake)
 endif()
