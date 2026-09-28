@@ -65,6 +65,11 @@ endif()
 ExternalProject_Add(ffmpeg_project
   SOURCE_DIR "${ARIA2_VENDOR_ROOT}/ffmpeg"
   BINARY_DIR "${CMAKE_BINARY_DIR}/vendor/ffmpeg"
+  BUILD_BYPRODUCTS
+    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavformat.a"
+    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavcodec.a"
+    "${ARIA2_DEPENDENCY_PREFIX}/lib/libswresample.a"
+    "${ARIA2_DEPENDENCY_PREFIX}/lib/libavutil.a"
   CONFIGURE_COMMAND ${media_environment} ${ARIA2_POSIX_SHELL} <SOURCE_DIR>/configure
     ${ffmpeg_tool_args} --prefix=${ARIA2_DEPENDENCY_PREFIX}
     "--extra-cflags=${media_cflags}" "--extra-ldflags=${media_ldflags}"
@@ -88,15 +93,24 @@ set(gpac_packages ssl opensvc openhevc platinum freetype jpeg openjpeg png mad a
   xvid faad ffmpeg freenect vorbis theora nghttp2 ngtcp2 nghttp3 oss dvb4linux
   alsa pulseaudio jack directfb hid lzma tinygl vtb ogg sdl caption mpeghdec
   libcaca curl)
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  set(gpac_dependencies)
+  set(gpac_zlib_arg --use-zlib=system)
+else()
+  set(gpac_dependencies zlib_project)
+  set(gpac_zlib_arg --use-zlib=${ARIA2_DEPENDENCY_PREFIX})
+endif()
 set(gpac_package_args)
 foreach(package IN LISTS gpac_packages)
   list(APPEND gpac_package_args --disable-${package})
 endforeach()
 ExternalProject_Add(gpac_project
-  DEPENDS zlib_project
+  DEPENDS ${gpac_dependencies}
   BUILD_ALWAYS TRUE
   SOURCE_DIR "${ARIA2_VENDOR_ROOT}/gpac"
   BINARY_DIR "${CMAKE_BINARY_DIR}/vendor/gpac"
+  BUILD_BYPRODUCTS
+    "${ARIA2_DEPENDENCY_PREFIX}/lib/libgpac_static.a"
   CONFIGURE_COMMAND ${media_environment} ${ARIA2_POSIX_SHELL} <SOURCE_DIR>/configure
     --prefix=${ARIA2_DEPENDENCY_PREFIX}
     ${media_tool_args} "--extra-cflags=${media_cflags}" "--extra-ldflags=${media_ldflags}"
@@ -104,7 +118,7 @@ ExternalProject_Add(gpac_project
     --enable-dashin --enable-parsers --enable-vtt --enable-ttxt --enable-import --enable-txtin
     --enable-isoff --enable-isoff-write --enable-isoff-frag
     --enable-threads --enable-network --enable-net-cap --enable-log
-    --use-zlib=${ARIA2_DEPENDENCY_PREFIX}
+    ${gpac_zlib_arg}
     ${gpac_package_args}
   BUILD_COMMAND ${media_environment} ${ARIA2_MAKE_EXECUTABLE} -C src -j${ARIA2_BUILD_JOBS} lib
   INSTALL_COMMAND ${CMAKE_COMMAND}

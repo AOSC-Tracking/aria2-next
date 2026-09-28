@@ -113,6 +113,9 @@ if(ENABLE_LIBARIA2)
 else()
   add_library(aria2_core STATIC ${ARIA2_CORE_SOURCES})
 endif()
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  add_dependencies(aria2_core ffmpeg_project gpac_project)
+endif()
 
 target_compile_definitions(aria2_core PUBLIC HAVE_CONFIG_H)
 target_include_directories(aria2_core
@@ -127,7 +130,11 @@ target_compile_definitions(aria2_core PRIVATE
   BOOST_ASIO_HEADER_ONLY
   BOOST_ERROR_CODE_HEADER_ONLY)
 target_link_libraries(aria2_core PRIVATE spdlog::spdlog_header_only)
-target_link_libraries(aria2_core PUBLIC CURL::libcurl_static)
+if(ARIA2_SYSTEM_DEPENDENCIES)
+  target_link_libraries(aria2_core PUBLIC CURL::libcurl)
+else()
+  target_link_libraries(aria2_core PUBLIC CURL::libcurl_static)
+endif()
 target_link_libraries(aria2_core PUBLIC aria2::gpac aria2::avformat
   aria2::avcodec aria2::swresample aria2::avutil)
 if(ENABLE_WEBSOCKET)

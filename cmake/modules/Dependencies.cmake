@@ -1,3 +1,5 @@
+if(ARIA2_DEPENDENCY_ROOT)
+
 function(aria2_import_dependency target header)
   set(options)
   set(one_value_args)
@@ -70,6 +72,7 @@ if(ARIA2_ENABLE_BITTORRENT)
     PATHS "${ARIA2_DEPENDENCY_ROOT}/lib/cmake/LibtorrentRasterbar"
     NO_DEFAULT_PATH
     NO_CMAKE_FIND_ROOT_PATH)
+  set(ARIA2_LIBTORRENT_INCLUDE_DIR "${ARIA2_DEPENDENCY_ROOT}/include")
 endif()
 
 unset(CURL_DIR CACHE)
@@ -94,3 +97,7 @@ get_target_property(aria2_curl_link_libraries CURL::libcurl_static
 list(FILTER aria2_curl_link_libraries EXCLUDE REGEX ".*ZLIB::ZLIB.*")
 set_property(TARGET CURL::libcurl_static PROPERTY INTERFACE_LINK_LIBRARIES
   "${aria2_curl_link_libraries}")
+
+else()
+  include(${CMAKE_CURRENT_LIST_DIR}/SystemDependencies.cmake)
+endif()
